@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for, request, render_template, send_from_directory
 import flask
-from core import pic, pdf
+from core import pic, pdf, doc
 from Questgen import main
 
 
@@ -40,6 +40,30 @@ def apiv3():
                 data = {"text":output,"short_qs":short_qs,"mc_qs":mc_qs}
             else:
                 output = {"input_text":PHandle.getText(data),"max_questions":10}
+                mc_qs = qe.predict_mcq(output)
+                data = {"text":output,"short_qs":{},"mc_qs":mc_qs}
+            return data
+        elif request.args['type'] == 'text':
+            data = request.json
+            output = {"input_text":data['text'],"max_questions":10}
+            if 'full' in request.args:
+                short_qs = qe.predict_shortq(output)
+                mc_qs = qe.predict_mcq(output)
+                data = {"text":output,"short_qs":short_qs,"mc_qs":mc_qs}
+            else:
+                output = {"input_text":PHandle.getText(data),"max_questions":10}
+                mc_qs = qe.predict_mcq(output)
+                data = {"text":output,"short_qs":{},"mc_qs":mc_qs}
+            return data
+        elif request.args['type'] == 'docx':
+            data = request
+            output = {"input_text":doc.DocxHandler.getText(data),"max_questions":10}
+            if 'full' in request.args:
+                short_qs = qe.predict_shortq(output)
+                mc_qs = qe.predict_mcq(output)
+                data = {"text":output,"short_qs":short_qs,"mc_qs":mc_qs}
+            else:
+                output = {"input_text":doc.DocxHandler.getText(data),"max_questions":10}
                 mc_qs = qe.predict_mcq(output)
                 data = {"text":output,"short_qs":{},"mc_qs":mc_qs}
             return data
